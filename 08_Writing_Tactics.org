@@ -398,7 +398,7 @@ virtual machine uses the internal C++ representations, so each
 constructor and the eliminator for the type are translated to the
 corresponding C++ functions. Expressions include the sorts =Prop=,
 =Type₁=, =Type₂=, ..., constants of each type, applications, lambdas,
-Pi types, and let definitions. The also include de Bruijn indices
+Pi types, and let definitions. They also include de Bruijn indices
 (with constructor =var=), metavariables, local constants, and macros.
 
 The whole purpose of tactic mode is to construct expressions, and so
