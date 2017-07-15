@@ -349,7 +349,7 @@ f= is supposed to "reach into the box," extract an element =a= from
 sa f= is supposed to be an element of =state S β=, which is really a
 function =S → β × S=. In other words, =bind sa f= is supposed to
 encode a function which operates on any state to produce an element of
-=β= tonad a new state. Doing so is straightforward: given any
+=β= and a new state. Doing so is straightforward: given any
 state =s=, =sa s= consists of a pair =(a, s₀)=, and applying =f= to
 =a= and then =s₀= yields the required element of =β × S=. Thus the
 def of =bind sa f= is as follows:
