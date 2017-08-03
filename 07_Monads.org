@@ -276,7 +276,7 @@ evaluating an expression =g (f a)= with =f : α → β= and =g : β → γ=,
 =f= would start the computation with the registers initialized to =0=,
 but could read and write values during the course of its
 computation. When =g= began its computation on =f a=, the registers
-would be set they way that =g= left them, and =g= could continue to
+would be set they way that =f= left them, and =g= could continue to
 read and write values. (To avoid questions as to how we would
 interpret the flow of control in terms like =h (k₁ a) (k₂ a)=, let us
 suppose that we only care about composing unary functions.)
