@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2017-07-24 Mon 23:25 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Programming in Lean</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="[[http://www.andrew.cmu.edu/user/avigad][Jeremy Avigad]]Jeremy Avigad, [[http://leodemoura.github.io][Leonardo de Moura]]Leonardo de Moura, [[http://jroesch.github.io/][Jared Roesch]]Jared Roesch" />
+<link rel="stylesheet" href="css/tutorial.css"/>
+<link rel="stylesheet" href="css/code.css"/>
+<script type="text/javascript" charset="utf-8">if(!window.PolymerGestures) { var head = document.getElementsByTagName('head')[0]; var js = document.createElement("script"); js.type = "text/javascript"; js.src = "//cdn.jsdelivr.net/webcomponentsjs/0.7.20/webcomponents.min.js"; head.appendChild(js); } </script>
+<link rel='import' href='juicy-ace-editor.html'/>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Programming in Lean</h1>
+
+<div id="outline-container-org00c8ed7" class="outline-2">
+<h2 id="Introduction"><a id="org00c8ed7"></a><span class="section-number-2"> 1</span> Introduction</h2>
+<div class="outline-text-2" id="text-Introduction">
+<p>
+<i>Warning.</i> This book is still under construction. It aims to serve as
+both an introduction and a reference manual for programming in the
+Lean theorem prover.
+</p>
+
+<p>
+We are making this material public now because currently it is the
+only existing documentation for many of the specifics of the Lean
+programming language and its API, and we are hoping that the
+information will be useful to brave souls experimenting with it at
+this early stage. Most of the chapters are currently only stubs, but
+comments and feedback on the material that is available will be
+helpful.
+</p>
+</div>
+
+<div id="outline-container-org722738a" class="outline-3">
+<h3 id="org722738a"><span class="section-number-3"> 1.1</span> Lean as a Programming Language</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+This book can be viewed as a companion to <a target='_blank' href="https://leanprover.github.io/theorem_proving_in_lean/">Theorem Proving in Lean</a>,
+which presents Lean as a system for building mathematical libraries
+and stating and proving mathematical theorems.  From that perspective,
+the point of Lean is to implement a formal axiomatic framework in
+which one can define mathematical objects and reason about them.
+</p>
+
+<p>
+As noted in that book, however, expressions in Lean have a
+computational interpretation, which is to say, they can be
+<i>evaluated</i>. As long as it is defined in the computational fragment of
+Lean's foundational language, any closed term of type <code>nat</code> &#x2013; that
+is, any term of type <code>nat</code> without free variables &#x2013; evaluates to a
+numeral. Similarly, any closed term of type <code>list nat</code> evaluates to a
+list of numerals, and any closed term of type <code>bool</code> evaluates
+either to the boolean value <code>tt</code>, for "true," or <code>ff</code>, for "false."
+</p>
+
+<p>
+This provides another perspective on Lean: instead of thinking of it
+as a theorem prover whose language just happens to have a
+computational interpretation, think of it as a programming language
+that just happens to come equipped with a rich specification language
+and an interactive environment for proving that programs meet their
+specifications. The specification language and proof system are quite
+powerful, rich enough, in fact, to include all conventional
+mathematics.
+</p>
+
+<p>
+We will see that Lean's underlying logical framework, the Calculus of
+Inductive Constructions, constitutes a surprisingly good programming
+language. It is expressive enough to define all sorts of data
+structures, and it supports powerful abstractions. Programs written in
+the language can be evaluated efficiently by Lean's virtual-machine
+interpreter or translated automatically to C++ and compiled.
+</p>
+
+<p>
+Viewed from a computational perspective, the Calculus of Inductive
+Constructions is an instance of a purely functional programming
+language. This means that a program in Lean is simply an expression
+whose value is determined compositionally from the values of the other
+expressions it refers to, independent of any sort of ambient state of
+computation. There is no notion of storing a result in memory or
+changing the value of a global variable; computation is just
+evaluation of expressions. This paradigm makes it easier to reason
+about programs and verify their correctness. At the same time, we will
+see that Lean incorporates concepts and abstractions that make it
+feasible to use this paradigm in practice.
+</p>
+
+<p>
+The underlying foundational framework imposes one restriction that is
+alien to most programming languages, namely, that every program is
+terminating. So, for example, every "while" loop has to be explicitly
+bounded, though, of course, we can consider the result of iterating an
+arbitrary computation <code>n</code> times for any given natural number <code>n</code>. We
+will see that Lean provides flexible mechanisms for structural and
+well-founded recursion, allowing us to define functions in natural
+ways. At the same, the system provides complementary mechanisms for
+proving claims, using inductive principles that capture the structure
+of the function definitions.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org31758d8" class="outline-3">
+<h3 id="org31758d8"><span class="section-number-3"> 1.2</span> Examples</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+For example&#x2026;
+</p>
+
+<p>
+[Define something like factorial. Evaluate (use both <code>reduce</code> and <code>eval</code>).]
+</p>
+
+<p>
+[Define operations on lists.]
+</p>
+
+<p>
+[Prove things, like <code>length (reverse l) = length l</code> or <code>reverse
+(reverse l) = l</code>.]
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1045c79" class="outline-3">
+<h3 id="org1045c79"><span class="section-number-3"> 1.3</span> Input and Output</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+People often want to write programs that interact with the outside
+world, querying users for input and presenting them with output during
+the course of a computation. Lean's foundational framework has no
+model of "the real world," but Lean declares <code>get_str</code> and <code>put_str</code>
+commands to get an input string from the user and write an input
+string to output, respectively. Within the foundational system, these
+are treated as black box operations. But when programs are evaluated
+by Lean's virtual machine or when they are translated to C++, they
+have the expected behavior. Here, for example, is a program that
+prints "hello world":
+</p>
+<div class="org-src-container">
+<juicy-ace-editor id='lean-juicy-ace-editor-1' mode="ace/mode/lean" readonly="true">import system.io
+variable [io.interface]
+open io
+
+def hello_world : io unit :=
+put_str "hello world\n"
+
+#eval hello_world
+</juicy-ace-editor><div id='lean-full-code-1' style='display:none'>import system.io
+variable [io.interface]
+open io
+
+def hello_world : io unit :=
+put_str "hello world\n"
+
+#eval hello_world
+</div><div class='no-print' align="left"><button type="button" onclick="invoke_leanjs($('#lean-full-code-1').text());">Try it yourself &raquo;</button></div>
+</div>
+<p>
+The next example prints the first 100 squares:
+</p>
+<div class="org-src-container">
+<juicy-ace-editor id='lean-juicy-ace-editor-2' mode="ace/mode/lean" readonly="true">import system.io
+variable [io.interface]
+open nat io
+
+def print_squares : ℕ → io unit
+| 0        := return ()
+| (succ n) := print_squares n &gt;&gt;
+              put_str (nat.to_string n ++ "^2 = " ++ 
+                       nat.to_string (n * n) ++ "\n")
+
+#eval print_squares 100
+</juicy-ace-editor><div id='lean-full-code-2' style='display:none'>import system.io
+variable [io.interface]
+open nat io
+
+def print_squares : ℕ → io unit
+| 0        := return ()
+| (succ n) := print_squares n &gt;&gt;
+              put_str (nat.to_string n ++ "^2 = " ++ 
+                       nat.to_string (n * n) ++ "\n")
+
+#eval print_squares 100
+</div><div class='no-print' align="left"><button type="button" onclick="invoke_leanjs($('#lean-full-code-2').text());">Try it yourself &raquo;</button></div>
+</div>
+
+<p>
+We will explain the data type <code>io unit</code> in Chapter <a href="#" onclick="myModule.loadTutorial('07_Monads', 'Monads')">Monads</a>. Although
+this program has a real world side effect of sending output to the
+screen when run, that effect is invisible to the formal
+foundation. From the latter's perspective, the type constructor <code>io</code>
+and the functions <code>put_str</code> and <code>get_str</code> are entirely opaque, objects
+about which that the axiomatic system has nothing to say. The <code>print
+axioms</code> command shows that the expression <code>hello world</code> depends on the
+constants <code>io</code> and <code>put_str</code>, which have been forcibly added to the
+axiomatic system.
+</p>
+<div class="org-src-container">
+<juicy-ace-editor id='lean-juicy-ace-editor-3' mode="ace/mode/lean" readonly="true">#print axioms hello_world</juicy-ace-editor><div id='lean-full-code-3' style='display:none'>import system.io
+variable [io.interface]
+open io
+
+def hello_world : io unit :=
+put_str "hello world\n"
+
+#print axioms hello_world
+</div><div class='no-print' align="left"><button type="button" onclick="invoke_leanjs($('#lean-full-code-3').text());">Try it yourself &raquo;</button></div>
+</div>
+<p>
+In this way, we can prove properties of programs involving <code>io</code> that
+do not depend in any way on the particular results of the input and
+output.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgafc3926" class="outline-3">
+<h3 id="Metaprogramming_in_Lean"><a id="orgafc3926"></a><span class="section-number-3"> 1.4</span> Metaprogramming in Lean</h3>
+<div class="outline-text-3" id="text-Metaprogramming_in_Lean">
+<p>
+Lean also allows <i>metaprograms</i>, which are Lean programs that involve
+objects and constructs that are not part of the axiomatic
+foundation. In particular:
+</p>
+<ul class="org-ul">
+<li>Metaprograms can use arbitrary recursive calls, with no concern for
+termination.</li>
+<li>Metaprograms can access <i>metaconstants</i>, that is, primitive
+functions and objects that are implemented internally in Lean and
+are not meant to be trusted by the foundational framework.</li>
+</ul>
+<p>
+Such definitions can be introduced using the keywords <code>meta def</code>
+instead of <code>def</code> and are marked for special treatment. In particular,
+because they are not part of the axiomatic foundation, they cannot
+appear as part of ordinary Lean definitions and theorems.
+</p>
+
+<p>
+For example, the following definition computes McCarthy's 91 function,
+without verifying that the computation terminates on all inputs
+(though, in fact, it does):
+</p>
+
+<div class="org-src-container">
+<juicy-ace-editor id='lean-juicy-ace-editor-4' mode="ace/mode/lean" readonly="true">meta def m91 : ℕ → ℕ
+| n := if n &gt; 100 then n - 10 else m91 (m91 (n + 11))
+
+#eval m91 10
+#eval m91 100
+#eval m91 1000
+</juicy-ace-editor><div id='lean-full-code-4' style='display:none'>meta def m91 : ℕ → ℕ
+| n := if n &gt; 100 then n - 10 else m91 (m91 (n + 11))
+
+#eval m91 10
+#eval m91 100
+#eval m91 1000
+</div><div class='no-print' align="left"><button type="button" onclick="invoke_leanjs($('#lean-full-code-4').text());">Try it yourself &raquo;</button></div>
+</div>
+<p>
+We can print out the first 120 values of <code>m91</code>:
+</p>
+<div class="org-src-container">
+<juicy-ace-editor id='lean-juicy-ace-editor-5' mode="ace/mode/lean" readonly="true">meta def print_m91 : ℕ → io unit
+| 0        := return ()
+| (succ n) := print_m91 n &gt;&gt;
+              put_str ("m91 " ++ nat.to_string n ++ " = " ++ 
+                       nat.to_string (m91 n) ++ "\n")
+
+#eval print_m91 120</juicy-ace-editor><div id='lean-full-code-5' style='display:none'>import system.io
+variable [io.interface]
+open nat io
+
+meta def m91 : ℕ → ℕ
+| n := if n &gt; 100 then n - 10 else m91 (m91 (n + 11))
+
+meta def print_m91 : ℕ → io unit
+| 0        := return ()
+| (succ n) := print_m91 n &gt;&gt;
+              put_str ("m91 " ++ nat.to_string n ++ " = " ++ 
+                       nat.to_string (m91 n) ++ "\n")
+
+#eval print_m91 120
+</div><div class='no-print' align="left"><button type="button" onclick="invoke_leanjs($('#lean-full-code-5').text());">Try it yourself &raquo;</button></div>
+</div>
+<p>
+Of course, such uses of recursion are dangerous.
+</p>
+
+<div class="org-src-container">
+<juicy-ace-editor id='lean-juicy-ace-editor-6' mode="ace/mode/lean" readonly="true">meta def foo : ℕ → ℕ
+| n := foo n + 1
+
+#reduce foo
+-- #eval foo 0
+</juicy-ace-editor><div id='lean-full-code-6' style='display:none'>meta def foo : ℕ → ℕ
+| n := foo n + 1
+
+#reduce foo
+-- #eval foo 0
+</div><div class='no-print' align="left"><button type="button" onclick="invoke_leanjs($('#lean-full-code-6').text());">Try it yourself &raquo;</button></div>
+</div>
+<p>
+Evaluating <code>foo</code> using the kernel evaluator shows that the
+implementation is a bit of a hack; the term in the definition includes
+a macro which names <code>foo</code> itself. The virtual machine that evaluates
+foo goes further, and carries out the recursive call, repeating this
+until the process runs out of memory. It is a good thing that Lean
+will not allow <code>foo</code> to appear in a <code>theorem</code> or in an ordinary
+<code>definition</code>; if we could prove <code>foo = foo + 1</code> then, substracting
+<code>foo</code> from both sides, we could prove <code>0 = 1</code>, and hence a
+contradiction.
+</p>
+
+<p>
+Although metaprograms can be used in various ways, its primary purpose
+is to provide a means of extending the functionality of Lean, within
+Lean itself. For example, we can use metaprograms to write new
+procedures, known as <i>tactics</i>, which help us construct proofs. This
+next example assumes you are familiar with the notion of a tactic, as
+described in <i>Theorem Proving in Lean</i>.
+</p>
+
+<p>
+The following code implements a tactic that, given any goal,
+repeatedly finds a hypothesis <code>h</code> of the form <code>a ∧ b</code>, and
+replaces it by hypotheses (with fresh names) for <code>a</code> and <code>b</code>.
+</p>
+<div class="org-src-container">
+<juicy-ace-editor id='lean-juicy-ace-editor-7' mode="ace/mode/lean" readonly="true">meta def destruct_conjunctions : tactic unit :=
+repeat (do
+  l ← local_context,
+  first $ l^.for (λ h, do
+    ht ← infer_type h &gt;&gt;= whnf,
+    match ht with
+    | `(and %%a %%b) := do
+      n ← mk_fresh_name,
+      mk_mapp ``and.left [none, none, some h] &gt;&gt;= assertv n a,
+      n ← mk_fresh_name,
+      mk_mapp ``and.right [none, none, some h] &gt;&gt;= assertv n b,
+      clear h
+    | _ := failed
+    end))</juicy-ace-editor><div id='lean-full-code-7' style='display:none'>open tactic monad expr
+
+meta def destruct_conjunctions : tactic unit :=
+repeat (do
+  l ← local_context,
+  first $ l^.for (λ h, do
+    ht ← infer_type h &gt;&gt;= whnf,
+    match ht with
+    | `(and %%a %%b) := do
+      n ← mk_fresh_name,
+      mk_mapp ``and.left [none, none, some h] &gt;&gt;= assertv n a,
+      n ← mk_fresh_name,
+      mk_mapp ``and.right [none, none, some h] &gt;&gt;= assertv n b,
+      clear h
+    | _ := failed
+    end))
+</div><div class='no-print' align="left"><button type="button" onclick="invoke_leanjs($('#lean-full-code-7').text());">Try it yourself &raquo;</button></div>
+</div>
+<p>
+We will explain the details in <a href="#" onclick="myModule.loadTutorial('08_Writing_Tactics.html', 'Writing_Tactics')">Chapter 8</a> but, roughly speaking, the
+code repeats the following action until there is nothing left to do:
+get the list of hypotheses in the local context, find a hypothesis <code>h</code>
+whose type is a conjunction, add new hypotheses justified by <code>and.left
+h</code> and <code>and.right h</code> to the local context, and then delete <code>h</code>. We can
+then use <code>destruct_conjunctions</code> like any other Lean tactic.
+</p>
+<div class="org-src-container">
+<juicy-ace-editor id='lean-juicy-ace-editor-8' mode="ace/mode/lean" readonly="true">example (a b c : Prop) (h : (a ∧ b) ∧ (c ∧ a)) : c :=
+begin destruct_conjunctions &gt;&gt; assumption end</juicy-ace-editor><div id='lean-full-code-8' style='display:none'>open tactic monad expr
+
+meta def destruct_conjunctions : tactic unit :=
+repeat (do
+  l ← local_context,
+  first $ l^.for (λ h, do
+    ht ← infer_type h &gt;&gt;= whnf,
+    match ht with
+    | `(and %%a %%b) := do
+      n ← get_unused_name `h none,
+      mk_mapp ``and.left [none, none, some h] &gt;&gt;= assertv n a,
+      n ← get_unused_name `h none,
+      mk_mapp ``and.right [none, none, some h] &gt;&gt;= assertv n b,
+      clear h
+    | _ := failed
+    end))
+
+example (a b c : Prop) (h : (a ∧ b) ∧ (c ∧ a)) : c :=
+begin destruct_conjunctions &gt;&gt; assumption end
+</div><div class='no-print' align="left"><button type="button" onclick="invoke_leanjs($('#lean-full-code-8').text());">Try it yourself &raquo;</button></div>
+</div>
+<p>
+Note that the reason we can use such code to prove theorems without
+compromising the integrity of the formal system is that Lean's kernel
+always certifies the result. From a foundational point of view, we
+don't have to worry about the integrity of the code, only the
+integrity of the resulting proofs.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0a09dd2" class="outline-3">
+<h3 id="org0a09dd2"><span class="section-number-3"> 1.5</span> Overview of the contents</h3>
+<div class="outline-text-3" id="text-1-5">
+<p>
+To summarize, we can use Lean in any of the following ways:
+</p>
+<ul class="org-ul">
+<li>as a programming language</li>
+<li>as a system for verifying properties of programs</li>
+<li>as a system for writing metaprograms, that is, programs that extend
+the functionality of Lean itself</li>
+</ul>
+
+<p>
+Chapters <a href="#" onclick="myModule.loadTutorial('02_Programming_Basics.html', 'Programming_Basics')">2</a> to <a href="#" onclick="myModule.loadTutorial('07_Monads.html', 'Monads')">7</a> explain how to use Lean as a programming language. It
+will be helpful if you have some familiarity with the syntax and
+meaning of dependent type theory, for example, as presented in
+<i>Theorem Proving in Lean</i> (henceforth <i>TPL</i>). But, if not, it is
+likely that you will be able to pick up the details as we
+proceed. Similarly, if you are familiar with functional programming,
+you will be able to move through the material more quickly, but we
+will try to keep the presentation below self contained.
+</p>
+
+<p>
+<a href="#" onclick="myModule.loadTutorial('04_Verifying_Properties_of_Programs.html', 'Verifying_Properties_of_Programs')">Chapter 4</a> in particular deals with the task of proving things about
+programs. Once again, it will be helpful if you are familiar with the
+use of Lean as an interactive theorem prover as described in <i>TPL</i>,
+but if not you are encouraged to forge ahead and refer back to <i>TPL</i>
+as necessary.
+</p>
+
+<p>
+Finally, <a href="#" onclick="myModule.loadTutorial('08_Writing_Tactics.html', 'Writing_Tactics')">Chapter 8</a> and <a href="#" onclick="myModule.loadTutorial('09_Writing_Automation.html', 'Writing_Automation')">Chapter 9</a> deal with metaprogramming aspects of
+Lean, and, in particular, writing tactics and automation.
+</p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

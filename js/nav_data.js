@@ -1,0 +1,1 @@
+var lean_nav_data=["01_Introduction.html","02_Programming_Basics.html","03_Data_Types.html","04_Verifying_Properties_of_Programs.html","05_Recursion.html","06_Type_Classes.html","07_Monads.html","08_Writing_Tactics.html","09_Writing_Automation.html","10_The_Tactic_Library.html"];
